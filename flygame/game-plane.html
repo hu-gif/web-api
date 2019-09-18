@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta http-equiv="viewport" content="width=device-width,user-scalable=no,inital-scale=1.0">
+</head>
+<style type="text/css">
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	#view {
+		width: 320px;
+		height: 568px;
+		background: url('./img/bg.png');
+		margin: 0 auto;
+	}
+	#fly_me {
+		width: 34px;
+		height: 24px;
+		position: absolute;
+	}
+</style>
+<body>
+    <div id="view"></div>
+
+    <script type="text/javascript">
+    //创建战机
+    var flyEle = document.createElement('div');
+    flyEle.id = 'fly_me';
+    flyEle.innerHTML = '<img src="./img/me.png" />';
+    document.body.appendChild(flyEle);
+
+    //战机跟随鼠标
+    document.onmousemove = function(e){
+    	var flyEle = document.getElementById('fly_me');
+    	var view = document.getElementById('view');
+    	var flyX = e.clientX-17;
+    	var flyY = e.clientY-12;
+    	var xCheck = flyX > view.offsetLeft && flyX < view.offsetLeft + view.offsetWidth - flyEle.offsetWidth;
+    	var yCheck = flyY > view.offsetTop && flyY < view.offsetTop + view.offsetHeight - flyEle.offsetHeight;
+    	if (xCheck && yCheck){
+    	flyEle.style.top = flyY + 'px';
+    	flyEle.style.left = flyX + 'px';
+    	flyEle.flag = true;
+    	}
+    }
+    //创建子弹	
+    var objB = { //子弹的相关值
+        name: 'bullet',
+        num: 1,
+        arr: [],// ['id|top|left']
+        width: 6,
+        height: 14,
+        path: './img/b.png'
+    };
+    createBullet(objB);
+    function createBullet(obj) {
+        setInterval(function () {
+            var flyEle = document.getElementById('fly_me');
+            if (flyEle.flag) {
+                var ele = document.createElement('div');
+                ele.id = obj.name + obj.num;
+                var length = obj.arr.length;
+                if (length < 50) {
+                    obj.arr[length] = ele.id + '|';
+                    obj.num++;
+                    ele.style.width = obj.width + "px";
+                    ele.style.height = obj.height + "px";
+                    ele.style.position = 'absolute';
+                    ele.style.background = 'url(' + obj.path + ')';
+
+                    ele.style.top = parseInt(flyEle.style.top) + 6 + 'px';
+                    obj.arr[length] = obj.arr[length] + ele.style.top + '|';
+                    ele.style.left = parseInt(flyEle.style.left) + 14 + 'px';
+                    obj.arr[length] = obj.arr[length] + ele.style.left;
+                }
+                document.body.appendChild(ele);
+            }
+        }, 1000)
+    }
+
+    //让子弹运动
+    function moveBullet(){
+    	 var flyEle = document.getElementById('fly_me');
+            if (flyEle.flag) {
+            	for(var i=0; i<objB.arr.length; i++){
+            		var newArr = objB.arr[i].split('|');
+            		var eleB = document.getElementById(newArr[0]);
+            		newArr[1] = parseInt(newArr[1]) -1;
+            		eleB.style.top = newArr[1] + 'px';
+            		objB.arr[i] =newArr[0]+'|'+newArr[1]+'|'+newArr[2];
+            		if (newArr[1]<0) {
+            			objB.arr.splice(i,1); //删除数组的数据
+            			var delEle = document.getElementById(newArr[0]);
+            			 delEle.parentNode.removeChild(delEle);
+            		}
+            	}
+            }
+    }
+    
+
+
+    //创建敌机
+    var objF = { //子弹的相关值
+        name: 'foe',
+        num: 1,
+        arr: [],// ['id|top|left']
+        width: 34,
+        height: 24,
+        path: './img/foe.png'
+    };
+    createFoe(objF);
+    function createFoe(obj) {
+        setInterval(function () {
+            var flyEle = document.getElementById('fly_me');
+            if (flyEle.flag) {
+                var ele = document.createElement('div');
+                ele.id = obj.name + obj.num;
+                var length = obj.arr.length;
+                if (length < 50) {
+                    obj.arr[length] = ele.id + '|';
+                    obj.num++;
+                    ele.style.width = obj.width + "px";
+                    ele.style.height = obj.height + "px";
+                    ele.style.position = 'absolute';
+                    ele.style.background = 'url(' + obj.path + ')';
+
+                    ele.style.top =0;
+                    obj.arr[length] = obj.arr[length] + ele.style.top + '|';
+                   var ran = 285 * Math.random();
+                    ele.style.left = view.offsetLeft + ran +'px';
+                    obj.arr[length] = obj.arr[length] + ele.style.left;
+                }
+                document.body.appendChild(ele);
+            }
+        }, 1000)
+    }
+    
+    //让敌机运动
+     function moveFoe(){
+    	 var flyEle = document.getElementById('fly_me');
+            if (flyEle.flag) {
+            	for(var i=0; i<objF.arr.length; i++){
+
+            		var newArr = objF.arr[i].split('|');
+            		var eleB = document.getElementById(newArr[0]);
+
+            		newArr[1] = parseInt(newArr[1]) +1;
+            		eleB.style.top = newArr[1] + 'px';
+            		objF.arr[i] =newArr[0]+'|'+newArr[1]+'|'+newArr[2];
+
+            		if (newArr[1]>view.offsetHeight-20) {
+            			objF.arr.splice(i,1); //删除数组的数据
+            			var delEle = document.getElementById(newArr[0]);
+            			 delEle.parentNode.removeChild(delEle);
+            		}
+            	}
+            }
+    }
+
+    setInterval(function(){
+    	//让子弹运动
+    	moveBullet();
+    	//让敌机运动
+    	moveFoe();
+    	//相遇后消失
+    	for(var i=0; i<objF.arr.length; i++){ //敌机
+    		var arrF = objF.arr[i].split('|');
+    		var eleF = document.getElementById(arrF[0]); //id
+
+    		var xFS = parseInt(arrF[2]); //start
+    		var xFE = parseInt(arrF[2])+34; //end
+    		var yFS = parseInt(arrF[1]);
+    		var yFE = parseInt(arrF[1])+24;
+
+    		for (var j=0; j < objB.arr.length; j++) { //子弹
+    			var arrB = objB.arr[j].split('|');
+    			var eleB = document.getElementById(arrB[0]);
+    			var xB = parseInt(arrB[2]);
+    			var yB = parseInt(arrB[1]);
+
+    			var xCheck = xB > xFS && xB < xFE;
+    			var yCheck = yB > yFS && yB < yFE;
+    			if (xCheck && yCheck) {
+    				objF.arr.splice(i, 1);
+    				eleF.parentNode.removeChild(eleF);
+    				objB.arr.splice(j, 1);
+    				eleB.parentNode.removeChild(eleB);
+    			}
+
+    		}
+    	}
+
+    }, 10)
+    </script>
+</body>
+</html>
